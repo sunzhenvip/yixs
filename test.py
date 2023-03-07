@@ -90,7 +90,7 @@ def login_attack(username, password, code, token):
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Cookie': 'PHPSESSID=' + secrets.token_hex(13),
     }
-    print(data)
+    # data = urllib3.urlencode(postData)
     # res = requests.post(url=base_url + route_login, data=data, headers=header, verify=False)
     res = requests.post(url=base_url + route_login, data=data, headers=header)
     result = json.loads(res.text)
