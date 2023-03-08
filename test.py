@@ -38,9 +38,9 @@ def create_uuid_png_name():
 
 
 def get_captcha_photo(url, captcha_uuid_name):  # 获取验证码图片
-    header = {'Cookie': 'PHPSESSID=0'}
+    # header = {'Cookie': 'PHPSESSID=0'}
     url = url + route_captcha
-    res = requests.get(url=url, headers=header, verify=False)
+    res = session_request.get(url=url, verify=False)
     with open(captcha_uuid_name, 'wb') as f:
         f.write(res.content)
     return captcha_uuid_name
@@ -72,7 +72,7 @@ def get_captcha_code():  # 获取到正确验证码
 
 
 def login_token():
-    response = requests.get(base_url + route_login)
+    response = session_request.get(base_url + route_login)
     # 使用 BeautifulSoup 解析 HTML 页面
     soup = BeautifulSoup(response.content, 'html.parser')
     # 获取 __token__ 的值
@@ -94,7 +94,7 @@ def login_attack(username, password, code, token):
     #  + secrets.token_hex(13),
     # data = urllib3.urlencode(postData)
     # res = requests.post(url=base_url + route_login, data=data, headers=header, verify=False)
-    res = requests.post(url=base_url + route_login, data=data, headers=header)
+    res = session_request.post(url=base_url + route_login, data=data, headers=header)
     result = json.loads(res.text)
     print("xxx11", result)
     return result
@@ -110,8 +110,8 @@ def main():
 if __name__ == '__main__':
     token = login_token()
     captcha_code = get_captcha_code()
-    username = "admin"
-    password = "qq123456"
+    username = "xxx"
+    password = "xxx"
     login_info = login_attack(username, password, captcha_code, token)
     print(login_info)
     if login_info['code'] == 1:
