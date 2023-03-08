@@ -40,7 +40,7 @@ def create_uuid_png_name():
     return datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + "-" + str(get_timestamp_uuid) + ".png"
 
 
-def get_captcha_photo(url, captcha_uuid_name):  # 获取验证码图片
+def get_captcha_photo(url, captcha_uuid_name):  # 请求验证码地址获取验证码图片
     # header = {'Cookie': 'PHPSESSID=0'}
     url = url + route_captcha
     res = session_request.get(url=url, verify=False)
@@ -49,7 +49,7 @@ def get_captcha_photo(url, captcha_uuid_name):  # 获取验证码图片
     return captcha_uuid_name
 
 
-def proto_to_captcha1(url, img_path):  # 获取验证码图片并且识别转验证码
+def proto_to_captcha1(url, img_path):  # 获取验证码图片并且识别转为可输入的数字或者字母
     # 获取图片
     zh_model = re.compile(u'[\u4e00-\u9fa5]')  # u4e00 和 u9fa5 是中文的两个端点
     img_name = get_captcha_photo(url, img_path)  # 获取验证码并返回完整路径
