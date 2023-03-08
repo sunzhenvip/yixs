@@ -9,6 +9,9 @@ base_url = "http://www.ximimim.top:1008"
 route_login = "/admin/common/login.shtml"
 route_captcha = "/captcha.shtml"
 session_request = requests.Session()
+session_request.headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299'
+}
 
 
 def img_ocr(img):
