@@ -111,8 +111,8 @@ def main():
 if __name__ == '__main__':
     token = login_token()
     captcha_code = get_captcha_code()
-    username = "xxx"
-    password = "xxx"
+    username = "admin"
+    password = "qq123456"
     login_info = login_attack(username, password, captcha_code, token)
     print(login_info)
     if login_info['code'] == 1:
