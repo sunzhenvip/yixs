@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 base_captcha = "captcha"
 
 base_url = "http://www.ximimim.top:1008"
+# base_url = "https://facai362.top"
 route_login = "/admin/common/login.shtml"
 route_captcha = "/captcha.shtml"
 session_request = requests.Session()

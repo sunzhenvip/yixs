@@ -12,7 +12,6 @@ def single_thread():
 
 # 多线程版本
 def multi_thread():
-    print("multi_thread begin")
     threads = []
     for url in blog.urls:
         threads.append(
@@ -24,8 +23,6 @@ def multi_thread():
 
     for thread in threads:
         thread.join()
-
-    print("multi_thread end")
 
 
 if __name__ == "__main__":
