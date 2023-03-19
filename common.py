@@ -4,6 +4,7 @@ import os
 import stat
 import uuid
 import ddddocr
+from urllib.parse import urlparse
 
 base_captcha = "captcha"
 
@@ -25,6 +26,12 @@ class LoginInfo:
         self.token = token
 
     def set_captcha(self, captcha):
+        self.captcha = captcha
+
+    def full_property_data(self, name, password, token, captcha):
+        self.username = name
+        self.password = password
+        self.token = token
         self.captcha = captcha
 
 
@@ -68,3 +75,23 @@ def img_ocr(img):
     res = ocr.classification(img_bytes)  # 识别
     # print(res)
     return res
+
+
+def get_host_port(url):
+    """解析URL获取域名和端口号"""
+    parsed_url = urlparse(url)
+    host_name = parsed_url.netloc.split(':')
+    if len(host_name) > 1:
+        return "{}_{}".format(host_name[0], host_name[1])
+    else:
+        return host_name[0]
+
+
+# 创建指定目录
+def create_platform_address(base_dir, attachment, platform_address):
+    directory = os.path.join(base_dir, attachment, platform_address)
+    if not os.path.exists(directory):
+        # 目录不存在，创建此目录，并设置权限为 rwxrwxrwx (即777)
+        os.mkdir(directory, 0o777)
+    else:
+        pass

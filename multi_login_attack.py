@@ -29,6 +29,12 @@ semaphore = asyncio.Semaphore(50)
 ACCOUNT_FILE_NAME = "account.txt"
 # 获取文件最多行数
 FILE_NUM_LINES = 10
+# 验证码失败尝试次数
+ATTEMPT_NUM = 3
+# 平台地址
+PLATFORM_ADDRESS = common.get_host_port(base_url)
+# 附件目录
+ATTACHMENT = "attachment"
 
 
 async def get_captcha_code(session: aiohttp.ClientSession):  # 获取到正确验证码
@@ -103,12 +109,56 @@ async def async_craw(url):
             print("captcha_code=", captcha)
             # 构造信息
             login_info = common.LoginInfo()
-            login_info.set_name("admin")
-            login_info.set_password("123456")
-            login_info.set_token(token)
+            login_info.full_property_data("admin", "123456", token, captcha)
+            res_dict = await login_attack(session, login_info)  # 登录数据返回结果
+            login_resp = common.LoginResponse()
+            # 返回结果反射到LoginResponse属性中
+            common.dict_to_obj(res_dict, login_resp)
+            print(res_dict)
+            # 校验验证码错误 尝试再次登录
+            # login_resp.msg = "验证码不正确"
+            captcha_record_nums = 1  # 记录验证码获取计词
+            if "验证码不正确" in login_resp.msg:
+                await login_attempt(session, login_info, login_resp, captcha_record_nums)
+            else:
+                pass
+
+            # if "验证码不正确" in login_resp.msg:
+            #     # 只允许限定次数内重新获取验证码 5 <= 100
+            #     if captcha_record_nums <= ATTEMPT_NUM:
+            #         captcha = await get_captcha_code(session)
+            #         captcha_record_nums += 1
+            #         print("captcha get number", captcha_record_nums)
+            #         # print("captcha_code=", captcha)
+            #         if captcha_record_nums == 3:
+            #             # 重新设置验证码
+            #             login_info.set_captcha(captcha)
+            #         res_dict = await login_attack(session, login_info)  # 登录数据返回结果
+            #         print(res_dict)
+            #         login_resp = common.LoginResponse()
+            #     else:
+            #         print("该{}账号已超过获取次数".format("admin"))
+
+
+# 尝试登录多次
+async def login_attempt(session: aiohttp.ClientSession, login_info: common.LoginInfo, login_resp: common.LoginResponse,
+                        captcha_record_nums):
+    if "验证码不正确" in login_resp.msg:
+        # 只允许限定次数内重新获取验证码 5 <= 100
+        if captcha_record_nums <= ATTEMPT_NUM:
+            captcha = await get_captcha_code(session)
+            captcha_record_nums += 1
+            print("captcha get number", captcha_record_nums)
+            # print("captcha_code=", captcha)
+            # if captcha_record_nums == 4:
+            # 重新设置验证码
             login_info.set_captcha(captcha)
-            res = await login_attack(session, login_info)
-            print("login_attack=", res)
+            res_dict = await login_attack(session, login_info)  # 登录数据返回结果
+            print(res_dict)
+            common.dict_to_obj(res_dict, login_resp)
+            return await login_attempt(session, login_info, login_resp, captcha_record_nums)
+        else:
+            print("该{}账号已超过获取次数,直接返回".format("admin"))
 
 
 def start_task():
@@ -124,9 +174,14 @@ def start_task():
     print("协程 async cost:", end - start, "seconds")
 
 
-if __name__ == "__main__":
+def start_file_account():
     with open(ACCOUNT_FILE_NAME, "r") as f:
         for i in range(FILE_NUM_LINES):
             p = f.readline().strip()
             print(p)
+
+
+if __name__ == "__main__":
+    common.create_platform_address(os.getcwd(), ATTACHMENT, PLATFORM_ADDRESS)
+    # start_file_account()
     # start_task()
