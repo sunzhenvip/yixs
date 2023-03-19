@@ -28,6 +28,22 @@ class LoginInfo:
         self.captcha = captcha
 
 
+class LoginResponse:
+    def __init__(self):
+        self.code = None
+        self.msg = None
+        self.data = None
+        self.url = None
+        self.wait = None
+
+
+# 字典变量字段数据自动映射到类属性中
+def dict_to_obj(d, obj):
+    for key, value in d.items():
+        if hasattr(obj, key):
+            setattr(obj, key, value)
+
+
 def create_uuid_png_name():
     get_timestamp_uuid = uuid.uuid1()  # 根据 时间戳生成 uuid , 保证全球唯一
     return datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + "-" + str(get_timestamp_uuid) + ".png"

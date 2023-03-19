@@ -24,6 +24,9 @@ session_request.headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299'
 }
 
+# 信号量控制并发数量
+semaphore = asyncio.Semaphore(50)
+
 
 async def get_captcha_code(session: aiohttp.ClientSession):  # 获取到正确验证码
     # 创建目录
@@ -53,10 +56,6 @@ async def get_captcha_image(url, img_path_name, session: aiohttp.ClientSession):
         else:
             print("get_captcha_image方法识别有误,尝试从新中... ", res)
             await get_captcha_image(url, img_path_name, session)
-
-
-# 信号量控制并发数量
-semaphore = asyncio.Semaphore(50)
 
 
 async def login_token(session: aiohttp.ClientSession):

@@ -87,12 +87,14 @@ def main():
 if __name__ == '__main__':
     token = login_token()
     captcha_code = get_captcha_code()
-    username = "xx"
-    password = "xx"
+    username = "admin"
+    password = "123456"
     login_info = login_attack(username, password, captcha_code, token)
-    print(login_info)
-    if login_info['code'] == 1:
-        print("登录成功,用户名{0},密码{1}".format(username, password))
+    login_resp = common.LoginResponse()
+    common.dict_to_obj(login_info, login_resp)
+    print(login_resp)
+    if login_resp.code == 1:
+        print("登录成功,用户名{},密码{}".format(username, password))
     else:
         pass
         # print(login_info['msg'])

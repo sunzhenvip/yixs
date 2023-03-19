@@ -11,11 +11,10 @@ semaphore = asyncio.Semaphore(50)
 async def async_craw(url):
     async with semaphore:
         async with aiohttp.ClientSession() as session:
-            session.get(url)
-            # async with session.get(url) as resp:
-            #     result = await resp.text()
-            #     # await asyncio.sleep(5)  # 等待五秒
-            #     print(f"craw url:{url}, {len(result)}")
+            async with session.get(url) as resp:
+                result = await resp.text()
+                # await asyncio.sleep(5)  # 等待五秒
+                print(f"craw url:{url}, {len(result)}")
 
 
 def start_task():
