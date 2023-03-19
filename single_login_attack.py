@@ -16,6 +16,10 @@ session_request.headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299'
 }
 
+ACCOUNT_FILE_NAME = "account.txt"
+# 获取文件最多行数
+FILE_NUM_LINES = 10
+
 
 def get_captcha_photo(url, captcha_uuid_name):  # 请求验证码地址获取验证码图片
     # header = {'Cookie': 'PHPSESSID=0'}

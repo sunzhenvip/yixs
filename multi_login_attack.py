@@ -26,6 +26,9 @@ session_request.headers = {
 
 # 信号量控制并发数量
 semaphore = asyncio.Semaphore(50)
+ACCOUNT_FILE_NAME = "account.txt"
+# 获取文件最多行数
+FILE_NUM_LINES = 10
 
 
 async def get_captcha_code(session: aiohttp.ClientSession):  # 获取到正确验证码
@@ -122,4 +125,8 @@ def start_task():
 
 
 if __name__ == "__main__":
-    start_task()
+    with open(ACCOUNT_FILE_NAME, "r") as f:
+        for i in range(FILE_NUM_LINES):
+            p = f.readline().strip()
+            print(p)
+    # start_task()
