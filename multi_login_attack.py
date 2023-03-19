@@ -158,7 +158,7 @@ async def login_attempt(session: aiohttp.ClientSession, login_info: common.Login
             common.dict_to_obj(res_dict, login_resp)
             return await login_attempt(session, login_info, login_resp, captcha_record_nums)
         else:
-            print("该{}账号已超过获取次数,直接返回".format(login_info.username))
+            print("该{},{}账号已超过获取次数,直接返回".format(login_info.username, login_info.password))
 
 
 def start_task():
