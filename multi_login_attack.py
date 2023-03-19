@@ -171,7 +171,7 @@ def start_task():
     loop.run_until_complete(asyncio.wait(tasks))  # 等待所有的任务完成
 
     end = time.time()
-    print("协程 async cost:", end - start, "seconds")
+    print("协程 async 总耗时:", end - start, "seconds")
 
 
 def start_file_account():
@@ -182,6 +182,6 @@ def start_file_account():
 
 
 if __name__ == "__main__":
-    common.create_platform_address(os.getcwd(), ATTACHMENT, PLATFORM_ADDRESS)
+    # common.create_platform_address(os.getcwd(), ATTACHMENT, PLATFORM_ADDRESS)
     # start_file_account()
-    # start_task()
+    start_task()
