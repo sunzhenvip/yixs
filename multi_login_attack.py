@@ -51,11 +51,11 @@ async def get_captcha_image(url, img_path_name, session: aiohttp.ClientSession):
                 file.write(chunk)
         res = common.img_ocr(img_path_name)
         # # 判断字符串是否仅由数字字符或者字母数字组成
-        if (res.isdigit() or res.isalnum()) and not zh_model.search(res):
+        if res and ((res.isdigit() or res.isalnum()) and not zh_model.search(res)):
             return res
         else:
             print("get_captcha_image方法识别有误,尝试从新中... ", res)
-            await get_captcha_image(url, img_path_name, session)
+            return await get_captcha_image(url, img_path_name, session)
 
 
 async def login_token(session: aiohttp.ClientSession):
