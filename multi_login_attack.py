@@ -9,8 +9,8 @@ from bs4 import BeautifulSoup
 
 base_captcha = "captcha"
 
-# base_url = "http://www.ximimim.top:1008"
-base_url = "http://www.bmavi.top"
+base_url = "http://www.ximimim.top:1008"
+# base_url = "http://www.bmavi.top"
 # base_url = "https://facai362.top"
 route_login = "/admin/common/login.shtml"
 route_captcha = "/captcha.shtml"
@@ -181,7 +181,14 @@ def start_file_account():
             print(p)
 
 
-if __name__ == "__main__":
-    # common.create_platform_address(os.getcwd(), ATTACHMENT, PLATFORM_ADDRESS)
+def main():
+    # 获取平台登陆地址
+    print("平台登陆地址", base_url + route_login)
+    # 生成平台对应目录
+    common.create_platform_address(os.getcwd(), ATTACHMENT, PLATFORM_ADDRESS)
     # start_file_account()
     start_task()
+
+
+if __name__ == "__main__":
+    main()
