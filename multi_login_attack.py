@@ -122,7 +122,7 @@ async def async_craw(url):
                 await login_attempt(session, login_info, login_resp, captcha_record_nums)
             else:
                 pass
-
+            # await asyncio.sleep(5)  # 等待五秒
             # if "验证码不正确" in login_resp.msg:
             #     # 只允许限定次数内重新获取验证码 5 <= 100
             #     if captcha_record_nums <= ATTEMPT_NUM:
