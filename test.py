@@ -2,6 +2,7 @@ import json
 import logging
 import datetime
 from logging.handlers import RotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler
 
 
 class JsonFilter(logging.Filter):
