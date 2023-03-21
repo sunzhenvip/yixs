@@ -47,6 +47,8 @@ IS_SOCKS5 = False  # 默认不开启socks5代理
 socks5_proxy_url = 'socks5://127.0.0.1:10808'  # 不带密码
 socks5_connector = SocksConnector.from_url(socks5_proxy_url)
 aiohttp_cookies = {'PHPSESSID': 'vj82u5m4j1nt7l7fo813rg1781'}
+# 判断URL是否是HTTPS链接地址
+IS_HTTPS = common.is_https(base_url)
 
 
 class MergedConnector(aiohttp.BaseConnector):
@@ -153,10 +155,11 @@ async def async_craw(url):
         }
         # 是否进行手动设置Cookie
         cookies = aiohttp_cookies if IS_COOKIE else None
-        # https ssl 证书忽略校验
-        connector = aiohttp.TCPConnector(verify_ssl=False) if IS_VERIFY_SSL else None
+        # 如果是https链接 读取配置进行是否忽略ssl证书校验
+        connector = aiohttp.TCPConnector(verify_ssl=False) if IS_VERIFY_SSL else None if IS_HTTPS else None
         # 是否进行socks5代理
-        connector = socks5_connector if IS_SOCKS5 else None
+        if IS_SOCKS5:
+            connector = socks5_connector
         # 没有找到此方法后续在查询资料
         # multi_connector = aiohttp.MultiConnector(connectors=[socks5_connector, tcp_connector])
         # 没有找到此方法后续在查询资料

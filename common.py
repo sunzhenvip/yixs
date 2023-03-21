@@ -87,6 +87,10 @@ def get_host_port(url):
         return host_name[0]
 
 
+def is_https(url):
+    parsed_url = urlparse(url)
+    return parsed_url.scheme == 'https'
+
 # 创建指定目录
 def create_platform_address(base_dir, attachment, platform_address):
     directory = os.path.join(base_dir, attachment, platform_address)
