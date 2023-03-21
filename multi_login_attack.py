@@ -37,11 +37,51 @@ ATTEMPT_NUM = 3
 PLATFORM_ADDRESS = common.get_host_port(base_url)
 # 附件目录
 ATTACHMENT = "attachment"
-# 部分网站无法访问加入代理模式
-IS_AGENT = False  # 默认不开启代理
+# 是否手动设置cookie
+IS_COOKIE = False
+# 是否手动设置ssl进行忽略
+IS_VERIFY_SSL = False
+# 部分网站无法访问加入代理模式可以解决
+IS_SOCKS5 = False  # 默认不开启socks5代理
 # socks5_proxy_url = 'socks5://[USERNAME:PASSWORD@]PROXY_HOST:PROXY_PORT' 带密码
 socks5_proxy_url = 'socks5://127.0.0.1:10808'  # 不带密码
 socks5_connector = SocksConnector.from_url(socks5_proxy_url)
+aiohttp_cookies = {'PHPSESSID': 'vj82u5m4j1nt7l7fo813rg1781'}
+
+
+class MergedConnector(aiohttp.BaseConnector):
+    """
+    代码示例可能对的
+    connector1 = aiohttp.TCPConnector()
+    connector2 = aiohttp.SSLConnector(sslcontext=ssl.create_default_context())
+    merged_connector = MergedConnector(connector1, connector2)
+    """
+
+    def __init__(self, *connectors):
+        super().__init__()
+        self.connectors = connectors
+
+    async def _create_connection(self, req, traces, timeout=None, client_error=asyncio.TimeoutError, **kwargs):
+        """
+        将请求分配给每个连接器，并返回第一个成功创建连接的结果。
+        """
+        for connector in self.connectors:
+            try:
+                return await connector._create_connection(req, traces, timeout, client_error, **kwargs)
+            except aiohttp.ClientConnectorError:
+                pass
+        raise aiohttp.ClientConnectorError('Failed to connect to any of the specified connectors.')
+
+    async def connect(self, req, *args, **kwargs):
+        """
+        将请求分配给每个连接器，并返回第一个成功建立连接的会话对象。
+        """
+        for connector in self.connectors:
+            try:
+                return await connector.connect(req, *args, **kwargs)
+            except aiohttp.ClientConnectorError:
+                pass
+        raise aiohttp.ClientConnectorError('Failed to connect to any of the specified connectors.')
 
 
 async def get_captcha_code(session: aiohttp.ClientSession):  # 获取到正确验证码
@@ -111,13 +151,18 @@ async def async_craw(url):
         header = {
             'Cookie': 'PHPSESSID=vj82u5m4j1nt7l7fo813rg1781'
         }
-        tcp_connector = aiohttp.TCPConnector(verify_ssl=False)  # 忽略https校验
-        verify_ssl = True
-        connector = None
-        if IS_AGENT:
-            connector = socks5_connector
-        # connector=socks5_connector, headers=None
-        async with aiohttp.ClientSession() as session:
+        # 是否进行手动设置Cookie
+        cookies = aiohttp_cookies if IS_COOKIE else None
+        # https ssl 证书忽略校验
+        connector = aiohttp.TCPConnector(verify_ssl=False) if IS_VERIFY_SSL else None
+        # 是否进行socks5代理
+        connector = socks5_connector if IS_SOCKS5 else None
+        # 没有找到此方法后续在查询资料
+        # multi_connector = aiohttp.MultiConnector(connectors=[socks5_connector, tcp_connector])
+        # 没有找到此方法后续在查询资料
+        # connector = aiohttp.Connector.combine(tcp_connector, socks5_connector)
+        # tcp_connector = aiohttp.TCPConnector(ssl=False, verify_ssl=False, limit=None, proxy=socks5_connector)
+        async with aiohttp.ClientSession(connector=connector, cookies=cookies) as session:
             print('获取数据中...........')
             # 获取登录地址中的token
             token = await login_token(session)
