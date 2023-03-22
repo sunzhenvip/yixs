@@ -4,6 +4,8 @@ import os
 import stat
 import uuid
 import ddddocr
+import ssl
+import aiohttp
 from urllib.parse import urlparse
 
 base_captcha = "captcha"
@@ -91,6 +93,7 @@ def is_https(url):
     parsed_url = urlparse(url)
     return parsed_url.scheme == 'https'
 
+
 # 创建指定目录
 def create_platform_address(base_dir, attachment, platform_address):
     directory = os.path.join(base_dir, attachment, platform_address)
@@ -99,3 +102,16 @@ def create_platform_address(base_dir, attachment, platform_address):
         os.mkdir(directory, 0o777)
     else:
         pass
+
+
+# 忽略SSL方式1
+def ignore_check_ssl():
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    return aiohttp.TCPConnector(ssl=ssl_context)
+
+
+# 忽略SSL方式2
+def ignore_verify_ssl():
+    return aiohttp.TCPConnector(verify_ssl=False)
