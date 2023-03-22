@@ -2,6 +2,7 @@ import logging
 import json
 from logging.handlers import RotatingFileHandler
 
+
 class MyLogger:
     def __init__(self):
         self.logger = logging.getLogger()
