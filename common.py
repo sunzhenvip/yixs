@@ -8,7 +8,10 @@ import ssl
 import aiohttp
 from urllib.parse import urlparse
 
-base_captcha = "captcha"
+# 验证码目录
+BASE_CAPTCHA = "captcha"
+# 附件目录
+ATTACHMENT = "attachment"
 
 
 class LoginInfo:
@@ -61,7 +64,7 @@ def create_uuid_png_name():
 def cur_create_dir():  # 创建当前日期目录
     year_month_day = datetime.datetime.now().strftime('%Y-%m-%d')
 
-    save_file_path = os.path.join(base_captcha, year_month_day)
+    save_file_path = os.path.join(BASE_CAPTCHA, year_month_day)
 
     if not os.path.exists(save_file_path):
         os.makedirs(save_file_path)

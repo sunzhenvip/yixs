@@ -1,6 +1,7 @@
 import logging
 import json
 from logging.handlers import RotatingFileHandler
+from common import ATTACHMENT
 
 
 class JSONFormatter(logging.Formatter):
@@ -20,7 +21,9 @@ class JSONFormatter(logging.Formatter):
 
 
 class MyLogger:
-    def __init__(self):
+    base_dir = ATTACHMENT
+
+    def __init__(self, platform_path):
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.DEBUG)
 
@@ -32,7 +35,7 @@ class MyLogger:
         debug_filter = logging.Filter()
         debug_filter.filter = lambda record: record.levelno == logging.DEBUG
         handler_debug = RotatingFileHandler(
-            filename='attachment/debug.log',
+            filename=f'{self.base_dir}/{platform_path}/debug.log',
             mode='a',
             maxBytes=max_bytes,
             backupCount=backup_count
@@ -41,7 +44,7 @@ class MyLogger:
         debug_info = logging.Filter()
         debug_info.filter = lambda record: record.levelno == logging.INFO
         handler_info = RotatingFileHandler(
-            filename='attachment/info.log',
+            filename=f'{self.base_dir}/{platform_path}/info.log',
             mode='a',
             maxBytes=max_bytes,
             backupCount=backup_count
@@ -50,7 +53,7 @@ class MyLogger:
         debug_warning = logging.Filter()
         debug_warning.filter = lambda record: record.levelno == logging.WARNING
         handler_warning = RotatingFileHandler(
-            filename='attachment/warning.log',
+            filename=f'{self.base_dir}/{platform_path}/warning.log',
             mode='a',
             maxBytes=max_bytes,
             backupCount=backup_count

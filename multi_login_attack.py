@@ -7,6 +7,7 @@ import common
 import requests
 import re, os, uuid, datetime, stat
 from bs4 import BeautifulSoup
+from logger import MyLogger
 
 base_captcha = "captcha"
 
@@ -35,8 +36,6 @@ FILE_NUM_LINES = 10
 ATTEMPT_NUM = 3
 # 平台地址
 PLATFORM_ADDRESS = common.get_host_port(base_url)
-# 附件目录
-ATTACHMENT = "attachment"
 # 是否手动设置cookie
 IS_COOKIE = False
 # 是否手动设置ssl进行忽略
@@ -49,6 +48,10 @@ socks5_connector = SocksConnector.from_url(socks5_proxy_url)
 aiohttp_cookies = {'PHPSESSID': 'vj82u5m4j1nt7l7fo813rg1781'}
 # 判断URL是否是HTTPS链接地址
 IS_HTTPS = common.is_https(base_url)
+# 生成平台对应目录
+common.create_platform_address(os.getcwd(), common.ATTACHMENT, PLATFORM_ADDRESS)
+# 日志记录器-按照平台地址区分
+my_logger = MyLogger(PLATFORM_ADDRESS)
 
 
 class MergedConnector(aiohttp.BaseConnector):
@@ -247,6 +250,8 @@ def start_file_account():
 
 
 def main():
+    my_logger.warning("xxxxxx")
+    return
     # 获取平台登陆地址
     print("平台登陆地址", base_url + route_login)
     # 生成平台对应目录
