@@ -252,6 +252,8 @@ def start_file_account():
 
 def main():
     # 获取平台登陆地址
+    # my_logger.warning(f'该账号已超过获取{ATTEMPT_NUM}次验证码,直接返回', {'username': 'admin', 'password': '123456'})
+    # return
     print("平台登陆地址", base_url + route_login)
     start_task()
 

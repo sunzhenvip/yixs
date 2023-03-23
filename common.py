@@ -12,6 +12,8 @@ from urllib.parse import urlparse
 BASE_CAPTCHA = "captcha"
 # 附件目录
 ATTACHMENT = "attachment"
+# 设置日志控制台输出日志类型Bool
+CONSOLE_OUTPUT = False
 
 
 class LoginInfo:

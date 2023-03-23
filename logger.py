@@ -2,6 +2,7 @@ import logging
 import json
 from logging.handlers import RotatingFileHandler
 from common import ATTACHMENT
+from common import CONSOLE_OUTPUT
 
 
 class JSONFormatter(logging.Formatter):
@@ -21,6 +22,17 @@ class JSONFormatter(logging.Formatter):
         # ensure_ascii 设置为 True（默认值） 所有非 ASCII 字符都会被转义为 Unicode 转义序列
         # (如\uXXXX）并以 ASCII 编码输出。如果 ensure_ascii 设置为 False，则所有非 ASCII 字符都将原样输出到 JSON 字符串中
         return json.dumps(data, ensure_ascii=False)
+
+
+class UserLogFilter(logging.Filter):
+    def filter(self, record):
+        ext_field = ''
+        if hasattr(record, 'username'):
+            ext_field += '账号 {}'.format(record.username)
+        if hasattr(record, 'password'):
+            ext_field += ' 密码 {}'.format(record.password)
+        record.ext_field = ext_field
+        return True
 
 
 class MyLogger:
@@ -64,6 +76,16 @@ class MyLogger:
             backupCount=backup_count,
             encoding='utf-8'
         )
+
+        # 添加 StreamHandler 将日志输出到控制台
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG)
+        console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s %(ext_field)s')
+        console_handler.setFormatter(console_formatter)
+        console_handler.addFilter(UserLogFilter())
+        # 配置用于控制台输出
+        if CONSOLE_OUTPUT:
+            self.logger.addHandler(console_handler)
 
         # 设置过滤
         handler_debug.addFilter(debug_filter)
