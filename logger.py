@@ -105,6 +105,8 @@ class MyLogger:
         self.logger.addHandler(handler_debug)
         self.logger.addHandler(handler_info)
         self.logger.addHandler(handler_warning)
+        # 此模块日志不输出
+        logging.getLogger("PIL.PngImagePlugin").disabled = True
 
     def debug(self, message, extra=None):
         if extra is None:

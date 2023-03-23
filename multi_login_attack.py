@@ -5,6 +5,7 @@ import time
 import json
 import common
 import requests
+import traceback
 import re, os, uuid, datetime, stat
 from bs4 import BeautifulSoup
 from logger import MyLogger
@@ -152,60 +153,62 @@ async def login_attack(session: aiohttp.ClientSession, login: common.LoginInfo):
 # 协程函数
 async def async_craw(url):
     async with semaphore:
-        # 部分https地址无法自动设置cookie 需要手动设置一下
-        header = {
-            'Cookie': 'PHPSESSID=vj82u5m4j1nt7l7fo813rg1781'
-        }
-        # 是否进行手动设置Cookie
-        cookies = aiohttp_cookies if IS_COOKIE else None
-        # 如果是https链接 读取配置进行是否忽略ssl证书校验
-        connector = aiohttp.TCPConnector(verify_ssl=False) if IS_VERIFY_SSL else None if IS_HTTPS else None
-        # 是否进行socks5代理
-        if IS_SOCKS5:
-            connector = socks5_connector
-        # 没有找到此方法后续在查询资料
-        # multi_connector = aiohttp.MultiConnector(connectors=[socks5_connector, tcp_connector])
-        # 没有找到此方法后续在查询资料
-        # connector = aiohttp.Connector.combine(tcp_connector, socks5_connector)
-        # tcp_connector = aiohttp.TCPConnector(ssl=False, verify_ssl=False, limit=None, proxy=socks5_connector)
-        async with aiohttp.ClientSession(connector=connector, cookies=cookies) as session:
-            print('获取数据中...........')
-            # 获取登录地址中的token
-            token = await login_token(session)
-            print(token)
-            captcha = await get_captcha_code(session)
-            print("captcha_code=", captcha)
-            # 构造信息
-            login_info = common.LoginInfo()
-            login_info.full_property_data("admin", "123456", token, captcha)
-            res_dict = await login_attack(session, login_info)  # 登录数据返回结果
-            login_resp = common.LoginResponse()
-            # 返回结果反射到LoginResponse属性中
-            common.dict_to_obj(res_dict, login_resp)
-            print(res_dict)
-            # 校验验证码错误 尝试再次登录
-            # login_resp.msg = "验证码不正确"
-            captcha_record_nums = 1  # 记录验证码获取计词
-            if "验证码不正确" in login_resp.msg:
-                await login_attempt(session, login_info, login_resp, captcha_record_nums)
-            else:
-                pass
-            # await asyncio.sleep(5)  # 等待五秒
-            # if "验证码不正确" in login_resp.msg:
-            #     # 只允许限定次数内重新获取验证码 5 <= 100
-            #     if captcha_record_nums <= ATTEMPT_NUM:
-            #         captcha = await get_captcha_code(session)
-            #         captcha_record_nums += 1
-            #         print("captcha get number", captcha_record_nums)
-            #         # print("captcha_code=", captcha)
-            #         if captcha_record_nums == 3:
-            #             # 重新设置验证码
-            #             login_info.set_captcha(captcha)
-            #         res_dict = await login_attack(session, login_info)  # 登录数据返回结果
-            #         print(res_dict)
-            #         login_resp = common.LoginResponse()
-            #     else:
-            #         print("该{}账号已超过获取次数".format("admin"))
+        try:
+            # 部分https地址无法自动设置cookie 需要手动设置一下
+            # header = {'Cookie': 'PHPSESSID=vj82u5m4j1nt7l7fo813rg1781'}
+            # 是否进行手动设置Cookie
+            cookies = aiohttp_cookies if IS_COOKIE else None
+            # 如果是https链接 读取配置进行是否忽略ssl证书校验
+            connector = aiohttp.TCPConnector(verify_ssl=False) if IS_VERIFY_SSL else None if IS_HTTPS else None
+            # 是否进行socks5代理
+            if IS_SOCKS5:
+                connector = socks5_connector
+            # 没有找到此方法后续在查询资料
+            # multi_connector = aiohttp.MultiConnector(connectors=[socks5_connector, tcp_connector])
+            # 没有找到此方法后续在查询资料
+            # connector = aiohttp.Connector.combine(tcp_connector, socks5_connector)
+            # tcp_connector = aiohttp.TCPConnector(ssl=False, verify_ssl=False, limit=None, proxy=socks5_connector)
+            async with aiohttp.ClientSession(connector=connector, cookies=cookies) as session:
+                print('获取数据中...........')
+                # 获取登录地址中的token
+                token = await login_token(session)
+                print(token)
+                captcha = await get_captcha_code(session)
+                print("captcha_code=", captcha)
+                # 构造信息
+                login_info = common.LoginInfo()
+                login_info.full_property_data("admin", "123456", token, captcha)
+                res_dict = await login_attack(session, login_info)  # 登录数据返回结果
+                login_resp = common.LoginResponse()
+                # 返回结果反射到LoginResponse属性中
+                common.dict_to_obj(res_dict, login_resp)
+                print(res_dict)
+                # 校验验证码错误 尝试再次登录
+                # login_resp.msg = "验证码不正确"
+                captcha_record_nums = 1  # 记录验证码获取计词
+                if "验证码不正确" in login_resp.msg:
+                    await login_attempt(session, login_info, login_resp, captcha_record_nums)
+                else:
+                    pass
+                # await asyncio.sleep(5)  # 等待五秒
+                # if "验证码不正确" in login_resp.msg:
+                #     # 只允许限定次数内重新获取验证码 5 <= 100
+                #     if captcha_record_nums <= ATTEMPT_NUM:
+                #         captcha = await get_captcha_code(session)
+                #         captcha_record_nums += 1
+                #         print("captcha get number", captcha_record_nums)
+                #         # print("captcha_code=", captcha)
+                #         if captcha_record_nums == 3:
+                #             # 重新设置验证码
+                #             login_info.set_captcha(captcha)
+                #         res_dict = await login_attack(session, login_info)  # 登录数据返回结果
+                #         print(res_dict)
+                #         login_resp = common.LoginResponse()
+                #     else:
+                #         print("该{}账号已超过获取次数".format("admin"))
+        except aiohttp.ClientError as error:
+            print(f'Request failed: {str(error)}')
+            traceback.print_exc()  # 打印完整的错误堆栈信息
 
 
 # 尝试登录多次
@@ -226,8 +229,8 @@ async def login_attempt(session: aiohttp.ClientSession, login_info: common.Login
             common.dict_to_obj(res_dict, login_resp)
             return await login_attempt(session, login_info, login_resp, captcha_record_nums)
         else:
-            my_logger.warning(f'该账号已超过获取{ATTEMPT_NUM}次验证码,直接返回', {'username': login_info.username,
-                                                                  'password': login_info.password})
+            await my_logger.warning(f'该账号已超过获取{ATTEMPT_NUM}次验证码,直接返回', {'username': login_info.username,
+                                                                        'password': login_info.password})
 
 
 def start_task():
