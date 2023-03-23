@@ -62,19 +62,16 @@ class MyLogger:
     def debug(self, message, extra=None):
         if extra is None:
             extra = {}
-        extra['custom_field'] = 'custom_value'
         self.logger.debug(message, extra=extra)
 
     def info(self, message, extra=None):
         if extra is None:
             extra = {}
-        extra['custom_field'] = 'custom_value'
         self.logger.info(message, extra=extra)
 
     def warning(self, message, extra=None):
         if extra is None:
             extra = {}
-        extra['custom_field'] = 'custom_value'
         self.logger.warning(message, extra=extra)
 
 
@@ -86,13 +83,16 @@ class JSONFormatter(logging.Formatter):
             'message': record.getMessage(),
             'module': record.module,
             'line': record.lineno,
-            'custom_field': record.custom_field,
         }
+        if hasattr(record, 'username'):
+            data['username'] = record.username
+        if hasattr(record, 'password'):
+            data['password'] = record.password
         return json.dumps(data)
 
 
 if __name__ == '__main__':
     my_logger = MyLogger()
-    my_logger.debug('This is a debug-level message', {'my_custom_field': 'my_custom_value'})
-    my_logger.info('This is a debug-level message', {'my_custom_field': 'my_custom_value'})
-    my_logger.warning('This is a debug-level message', {'my_custom_field': 'my_custom_value'})
+    my_logger.debug('This is a debug-level message', {'username': 'xxx'})
+    my_logger.info('This is a debug-level message', {'username': 'xxx'})
+    my_logger.warning('This is a debug-level message', {'username': 'xxx'})
