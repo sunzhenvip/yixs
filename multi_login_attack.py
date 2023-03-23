@@ -250,13 +250,8 @@ def start_file_account():
 
 
 def main():
-    my_logger.warning("xxxxxx")
-    return
     # 获取平台登陆地址
     print("平台登陆地址", base_url + route_login)
-    # 生成平台对应目录
-    common.create_platform_address(os.getcwd(), ATTACHMENT, PLATFORM_ADDRESS)
-    # start_file_account()
     start_task()
 
 
