@@ -9,15 +9,18 @@ class JSONFormatter(logging.Formatter):
         data = {
             'time': self.formatTime(record),
             'level': record.levelname,
-            'message': record.getMessage(),
-            'module': record.module,
-            'line': record.lineno,
+            'message': record.getMessage()
         }
         if hasattr(record, 'username'):
             data['username'] = record.username
         if hasattr(record, 'password'):
             data['password'] = record.password
-        return json.dumps(data)
+        # module 指的是模块名
+        # data['module'] = record.module
+        data['line'] = record.lineno
+        # ensure_ascii 设置为 True（默认值） 所有非 ASCII 字符都会被转义为 Unicode 转义序列
+        # (如\uXXXX）并以 ASCII 编码输出。如果 ensure_ascii 设置为 False，则所有非 ASCII 字符都将原样输出到 JSON 字符串中
+        return json.dumps(data, ensure_ascii=False)
 
 
 class MyLogger:
@@ -38,7 +41,8 @@ class MyLogger:
             filename=f'{self.base_dir}/{platform_path}/debug.log',
             mode='a',
             maxBytes=max_bytes,
-            backupCount=backup_count
+            backupCount=backup_count,
+            encoding='utf-8'
         )
         # 模式2
         debug_info = logging.Filter()
@@ -47,7 +51,8 @@ class MyLogger:
             filename=f'{self.base_dir}/{platform_path}/info.log',
             mode='a',
             maxBytes=max_bytes,
-            backupCount=backup_count
+            backupCount=backup_count,
+            encoding='utf-8'
         )
         # 模式3
         debug_warning = logging.Filter()
@@ -56,7 +61,8 @@ class MyLogger:
             filename=f'{self.base_dir}/{platform_path}/warning.log',
             mode='a',
             maxBytes=max_bytes,
-            backupCount=backup_count
+            backupCount=backup_count,
+            encoding='utf-8'
         )
 
         # 设置过滤
