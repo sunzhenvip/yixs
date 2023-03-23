@@ -3,6 +3,22 @@ import json
 from logging.handlers import RotatingFileHandler
 
 
+class JSONFormatter(logging.Formatter):
+    def format(self, record):
+        data = {
+            'time': self.formatTime(record),
+            'level': record.levelname,
+            'message': record.getMessage(),
+            'module': record.module,
+            'line': record.lineno,
+        }
+        if hasattr(record, 'username'):
+            data['username'] = record.username
+        if hasattr(record, 'password'):
+            data['password'] = record.password
+        return json.dumps(data)
+
+
 class MyLogger:
     def __init__(self):
         self.logger = logging.getLogger()
@@ -73,26 +89,3 @@ class MyLogger:
         if extra is None:
             extra = {}
         self.logger.warning(message, extra=extra)
-
-
-class JSONFormatter(logging.Formatter):
-    def format(self, record):
-        data = {
-            'time': self.formatTime(record),
-            'level': record.levelname,
-            'message': record.getMessage(),
-            'module': record.module,
-            'line': record.lineno,
-        }
-        if hasattr(record, 'username'):
-            data['username'] = record.username
-        if hasattr(record, 'password'):
-            data['password'] = record.password
-        return json.dumps(data)
-
-
-if __name__ == '__main__':
-    my_logger = MyLogger()
-    my_logger.debug('This is a debug-level message', {'username': 'xxx'})
-    my_logger.info('This is a debug-level message', {'username': 'xxx'})
-    my_logger.warning('This is a debug-level message', {'username': 'xxx'})
