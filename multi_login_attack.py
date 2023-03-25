@@ -213,9 +213,9 @@ async def async_craw(row, password):
                 #     else:
                 #         print("该{}账号已超过获取次数".format("admin"))
         except aiohttp.ClientError as error:
-            my_logger.warning('网络出错|程序异常|手动排查', log_extra)
             print(f'Request failed: {str(error)}')
-            traceback.print_exc()  # 打印完整的错误堆栈信息
+            # traceback.print_exc()  # 打印完整的错误堆栈信息
+            my_logger.warning('网络出错|程序异常|手动排查', log_extra)
 
 
 # 尝试登录多次
