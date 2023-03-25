@@ -6,6 +6,8 @@ import uuid
 import ddddocr
 import ssl
 import aiohttp
+import secrets
+import string
 from urllib.parse import urlparse
 
 # 验证码目录
@@ -107,6 +109,15 @@ def create_platform_address(base_dir, attachment, platform_address):
         os.mkdir(directory, 0o777)
     else:
         pass
+
+
+def create_random_26():
+    # 生成包含小写字母和数字的可打印ASCII字符集  随机生成26位字符串 小写+字母
+    alphabet = string.ascii_lowercase + string.digits
+
+    # 生成32位的随机字符串，然后截取前26位
+    session_id = ''.join(secrets.choice(alphabet) for i in range(32))[:26]
+    return session_id
 
 
 # 忽略SSL方式1
