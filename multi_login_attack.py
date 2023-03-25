@@ -38,9 +38,9 @@ ATTEMPT_NUM = 3
 # 平台地址
 PLATFORM_ADDRESS = common.get_host_port(base_url)
 # 是否手动设置cookie 可修改为 True
-IS_COOKIE = False
+IS_COOKIE = True
 # 是否手动设置ssl进行忽略 可修改为 True
-IS_VERIFY_SSL = False
+IS_VERIFY_SSL = True
 # 部分网站无法访问加入代理模式可以解决
 IS_SOCKS5 = False  # 默认不开启socks5代理
 # socks5_proxy_url = 'socks5://[USERNAME:PASSWORD@]PROXY_HOST:PROXY_PORT' 带密码
@@ -227,7 +227,7 @@ async def login_attempt(session: aiohttp.ClientSession, login_info: common.Login
         if captcha_record_nums <= ATTEMPT_NUM:
             captcha = await get_captcha_code(session)
             captcha_record_nums += 1
-            print("captcha get number", captcha_record_nums)
+            # print("captcha get number", captcha_record_nums)
             # print("captcha_code=", captcha)
             # if captcha_record_nums == 4:
             # 重新设置验证码
