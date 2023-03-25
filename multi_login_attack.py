@@ -32,7 +32,7 @@ session_request.headers = {
 semaphore = asyncio.Semaphore(10)
 ACCOUNT_FILE_NAME = "account.txt"
 # 获取文件最多行数
-FILE_NUM_LINES = 10
+FILE_NUM_LINES = 20
 # 验证码失败尝试次数
 ATTEMPT_NUM = 3
 # 平台地址
@@ -213,6 +213,7 @@ async def async_craw(row, password):
                 #     else:
                 #         print("该{}账号已超过获取次数".format("admin"))
         except aiohttp.ClientError as error:
+            my_logger.warning('网络出错|程序异常|手动排查', log_extra)
             print(f'Request failed: {str(error)}')
             traceback.print_exc()  # 打印完整的错误堆栈信息
 
