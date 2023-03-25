@@ -37,9 +37,9 @@ FILE_NUM_LINES = 20
 ATTEMPT_NUM = 3
 # 平台地址
 PLATFORM_ADDRESS = common.get_host_port(base_url)
-# 是否手动设置cookie
+# 是否手动设置cookie 可修改为 True
 IS_COOKIE = False
-# 是否手动设置ssl进行忽略
+# 是否手动设置ssl进行忽略 可修改为 True
 IS_VERIFY_SSL = False
 # 部分网站无法访问加入代理模式可以解决
 IS_SOCKS5 = False  # 默认不开启socks5代理
